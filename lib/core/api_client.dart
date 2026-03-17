@@ -20,6 +20,6 @@ class ApiClient {
     String endPoint, {
     Map<String, String>? headers,
   }) async {
-    return await http.get(Uri.parse('$baseUrl$getAllUsers'), headers: headers!);
+    return await http.get(Uri.parse('$baseUrl$endPoint'), headers: headers!);
   }
 }

@@ -18,31 +18,31 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   ApiClient apiClient = ApiClient();
-  // bool info = false;
+  bool info = false;
   List<UserListModel> userList = [];
-  dynamic information;
+  Map<String, dynamic> information = {};
+  // dynamic information;
 
   @override
   void initState() {
     super.initState();
     getUsers();
+    // clinicInfo();
   }
 
   Future<void> clinicInfo() async {
     // info = true;
-    http.Response detail = await apiClient.get(
+    http.Response res = await apiClient.get(
       clinicInformation,
       headers: {
         "Authorization": "Bearer ${await PreferenceService().getToken()}",
       },
     );
 
-    print(detail.body);
+    print("Deatila-----------${jsonDecode(res.body)}");
 
-    information = jsonDecode(detail.body);
-
-    if (detail.statusCode == 200) {
-      print(detail.body);
+    if (res.statusCode == 200) {
+      information = jsonDecode(res.body);
     } else {
       print("Failed to load information");
     }
@@ -80,11 +80,20 @@ class _AdminDashboardState extends State<AdminDashboard> {
               TextButton(
                 onPressed: () async {
                   await clinicInfo();
-                  setState(() {});
+                  setState(() {
+                    info = true;
+                  });
                 },
                 child: Text('My Clinic'),
               ),
-              TextButton(onPressed: () {}, child: Text('Users')),
+              TextButton(
+                onPressed: () {
+                  setState(() {
+                    info = false;
+                  });
+                },
+                child: Text('Users'),
+              ),
               TextButton(
                 onPressed: () {
                   Navigator.pushAndRemoveUntil(
@@ -99,7 +108,24 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
         ],
       ),
-      body: userList.isNotEmpty
+      body: info
+          ? Column(
+            children: [
+              ListTile(
+                  title: Text('Name :${information['name']}'),
+                  subtitle: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Text('Code : ${information['code']}'),
+                      Text('User Count =${information['userCount']}'),
+                      Text('Appointment Count =${information['appointmentCount']}'),
+                      Text('Queue Count =${information['queueCount']}'),
+                    ],
+                  ),
+                ),
+            ],
+          )
+          : userList.isNotEmpty
           ? ListView.builder(
               itemCount: userList.length,
               itemBuilder: (context, index) {
